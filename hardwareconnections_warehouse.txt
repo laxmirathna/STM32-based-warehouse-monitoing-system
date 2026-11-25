@@ -1,0 +1,45 @@
+MQ sensor 
+
+VCC-5V
+GND-GND
+A0-PA0
+D0-NOT CONNECTED
+
+
+HC ULTRASONIC SENSOR
+
+
+VCC-5V
+GND-GND
+TRIG-PA1
+ECHO-PA2(VOLTAGE DIVIDER)
+
+voltage divider 
+sensor echo->1Kohm->PA2->2.2Kohm-GND
+
+
+UART(PUTTY)
+
+TX-PA10
+RX-PA9
+GND-GND
+
+
+PA0 = ADC1_IN0      (MQ A0)
+PA1 = GPIO_Output   (HC-SR04 TRIG)
+PA2 = TIM2_CH3      (HC-SR04 ECHO)
+PA9 = USART1_TX
+PA10 = USART1_RX
+PC13 = GPIO_Output (LED)
+
+TIM2:
+Prescaler = 71
+Period = 65535
+Channel 3 = Input Capture Direct Mode
+
+USART1 = Asynchronous 115200
+
+
+
+PUTTY-SERIAL-COM5-115200
+

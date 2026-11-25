@@ -1,0 +1,83 @@
+#define GAS_THRESHOLD 700
+#define DISTANCE_THRESHOLD 10
+
+int _write(int file, char *ptr, int len)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+
+void delay_us(uint16_t us)
+{
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+
+    while(__HAL_TIM_GET_COUNTER(&htim2) < us);
+}
+
+uint32_t Read_Distance(void)
+{
+    uint32_t time = 0;
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
+    delay_us(2);
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
+    delay_us(10);
+
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
+
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+
+    while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET);
+
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+
+    while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_SET);
+
+    time = __HAL_TIM_GET_COUNTER(&htim2);
+
+    return time / 58;
+}
+
+HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_3);
+
+
+
+
+
+
+while (1)
+{
+    HAL_ADC_Start(&hadc1);
+    HAL_ADC_PollForConversion(&hadc1, 100);
+
+    uint32_t gas = HAL_ADC_GetValue(&hadc1);
+
+    uint32_t distance = Read_Distance();
+
+    printf("Gas=%lu Distance=%lu cm ", gas, distance);
+
+    if(gas < GAS_THRESHOLD)
+    {
+        printf("GAS ALERT ");
+    }
+
+    if(distance < DISTANCE_THRESHOLD)
+    {
+        printf("OBJECT DETECTED ");
+    }
+
+    printf("\r\n");
+
+    if((gas < GAS_THRESHOLD) || (distance < DISTANCE_THRESHOLD))
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
+    }
+
+    HAL_Delay(500);
+}
+
